@@ -1,13 +1,11 @@
 A few questions and concerns: 
 
+-1) Should we keep all the county dummy variables or drop them? In my current model, I dropped them. But, we have to consider that we did not drop them for the baseline model. I can revise this fairly easily. 
 
--- Should we keep all the variables or drop the variables?
--- Should we standardize all the features when we feed it into the neural network 
-    (it significantly improves training loss)
--- Why is it that when I use a framework like Skorch that does automatic cross-validation 
-(20% of the data is held out), the R squared performance on a test-set SIGNIFICANTLY drops? 
+-2)  Should we standardize all the features when we feed it into the neural network? 
 
+-3) How many layers or neurons are we considering? A range would be helpful because I am working with limited conception. 
 
--- How many layers or neurons are we considering? A range would be helpful because I am working with limited conception
--- Is this right to treat this as a regression task and not a classification (i.e., 1, 2, 3,4, 5)? 
+-4) Is this right to treat this as a regression task and not a classification (i.e., 1, 2, 3, 4, 5)? 
 
+-5) Any helpful resources you recommend on hyperparameter tuning? 
