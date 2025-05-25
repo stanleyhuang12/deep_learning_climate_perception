@@ -10,5 +10,9 @@ on 20% held out validation set.
 
 Performance of NN model: ~ 0.42+
 
+Feedback.txt has questions for Professor Peterson and Professor Binelli
+
+Tools.py contains code I used in my initial model developments but not important right now because I discovered skorch!!
+
 
 
