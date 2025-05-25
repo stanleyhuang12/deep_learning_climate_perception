@@ -1,7 +1,6 @@
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import r2_score
 import pandas as pd 
 
 

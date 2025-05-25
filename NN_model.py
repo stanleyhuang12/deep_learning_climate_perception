@@ -3,8 +3,10 @@ from torch import nn
 from tools import *
 from skorch import NeuralNetRegressor
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
 from skorch.callbacks import EarlyStopping
 from skorch.dataset import ValidSplit
+
 
 ## Organize data 
 
@@ -62,17 +64,17 @@ nn1_wrapper = NeuralNetRegressor(
     module__input_dims=32,
     module__list_n_units=[32, 32, 32],
     module__output_dims=1,
-    max_epochs=15,
+    max_epochs=30,
     optimizer=optim.Adam,
     optimizer__lr=0.1,
-    callbacks = [EarlyStopping(patience=5)],
+    callbacks = [EarlyStopping(patience=7)],
     train_split=ValidSplit(0.2) # We set internal train_split to 0 because GridSearch has cv=5
 )
 
 
 wrapper_param_grids = { 
-        'module__list_n_units': [[32, 32, 32], [64, 64, 64], [128, 128, 128]],
-        'optimizer__lr': [0.01, 0.02, 0.0275]
+        'module__list_n_units': [[32, 32, 32], [64, 64, 64], [128, 128, 128], [128, 64, 32]],
+        'optimizer__lr': [0.00375, 0.01, 0.02, 0.0275]
 }
 
 
@@ -83,11 +85,19 @@ grid_search_cv.fit(X.astype(np.float32), y.astype(np.float32).reshape(-1, 1))
 
 print(grid_search_cv.best_params_)
 """Best parameters: 
-
+{'module__list_n_units': [64, 64, 64], 'optimizer__lr': 0.01}
 """
 print(grid_search_cv.best_score_)
 """Best score (I believe the default for GridSearch on regression tasks is R2 score)
+0.4202298879623413
 """
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+
+grid_search_cv.fit(X_scaled.astype(np.float32), y.astype(np.float32).reshape(-1, 1))
+
 
 
 

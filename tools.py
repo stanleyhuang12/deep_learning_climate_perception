@@ -6,7 +6,7 @@ import torch.functional as F
 import torch.optim as optim
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 # from torch.utils.data import DataLoader, TensorDataset
-from sklearn.model_selection import ParameterGrid
+from sklearn.model_selection import ParameterGrid, KFold
 
 
 
@@ -16,7 +16,69 @@ def reset_model_parameters(model):
             module.reset_parameters() 
 
 
+## train with 20% held out validation set 
 
+def train_eval_held_out(model, X, y, epochs, criterion, lr, split_num): 
+    
+    kf_split = KFold(n_splits=split_num, shuffle=True, random_state=17)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    
+    for epoch in range(epochs): 
+        r2_scores = []
+        print('Step...')
+        for val_split, (train_indicies, test_indicies) in enumerate(kf_split.split(X)):
+            print(f"Fold {val_split}:") 
+            X_train, y_train = X[train_indicies], y[train_indicies]
+            X_test, y_test = X[test_indicies], y[test_indicies]
+            
+            if isinstance(X_train, np.ndarray):
+                X_train = torch.from_numpy(X_train).float()
+                X_test = torch.from_numpy(X_test).float()
+                print('Done ')
+                
+            if isinstance(y, np.ndarray): 
+                y_train = torch.from_numpy(y_train).float()
+                y_test = torch.from_numpy(y_test).float()
+            
+            # Set model to training mode
+            model.train()
+            
+            # Do forward pass 
+            y_pred = model.forward(X_train)
+            loss = criterion(y_pred, y_train)
+            
+            print('eval')
+            
+            # Reset gradient tracking
+            optimizer.zero_grad()
+            
+            # Compute gradient and perform descent 
+            loss.backward()
+            optimizer.step()
+            
+            # Perform evaluation on 20% held-out validation set every 100 epochs 
+            if epoch % 100 == 0: 
+                model.eval()
+                with torch.no_grad():
+                    
+                    y_eval = model.forward(X_test)
+                    
+                    y_eval_np = y_eval.cpu().numpy()
+                    y_test = y_test.cpu().numpy()
+                    
+                    current_fold_r2 = r2_score(y_test, y_eval_np)
+                    r2_scores.append(current_fold_r2)
+            
+        
+        print(f"Current averaged R2 score for epoch {epoch}: {np.mean(r2_scores)}")
+                        
+                
+            
+        
+        
+        
+
+## This function will be used if we evaluate on a test set 
 def train_and_evaluate_model(model, X_train, y_train, X_test, y_test, epochs, lr): 
     
     losses = []
