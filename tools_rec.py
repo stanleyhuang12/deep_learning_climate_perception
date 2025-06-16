@@ -13,6 +13,8 @@ import tempfile
 import time
 import ray
 from ray.tune import Checkpoint
+import matplotlib.pyplot as plt
+
 
 
 def reset_model_parameters(model):
@@ -91,14 +93,19 @@ def load_dataset(filepath):
         )
     
 def initialize_model(configs): 
+        val = configs.get('activation_fn', 0) # 0 will represent nn.ReLU
+        activation_dct = {
+            0: nn.ReLU,
+            1: nn.Tanh,
+        }
         base_neurons = 2 ** configs['base_exp']     # 8, 16, 32, ..., 4096
         list_n_units = [base_neurons] * configs['num_layers']
         
         return DynamicNet(input_dims=configs['input_dims'],
                    list_n_units=list_n_units,
-                   activation_fn=nn.ReLU,
+                   activation_fn=configs['activation_fn', nn.ReLU],
                    output_dims=1)
-    
+
 
 ### Deprecated 
 ## NOTE: Decided not to use Skorch wrapper 
@@ -128,7 +135,19 @@ def train_network(config):
     
     ## Session reporting done in Callback (see on_epoch_end)
     ## Final end of model reporting one in Callback (see on_train_end)
-            
+
+
+def plot_training_size_loss(training_size, loss_values):    
+    plt.figure(figsize=(10, 6))
+    plt.plot(training_size, loss_values, marker='o')
+    plt.line()
+    plt.title('Training Size vs Loss')
+    plt.xlabel('Training Size')
+    plt.ylabel('Loss')
+    plt.grid(True)
+    plt.show()
+    
+  
         
 def create_skorch_wrapper(config):
         
@@ -213,3 +232,4 @@ class RayReportCallback(Callback):
                               checkpoint=Checkpoint.from_directory(temp_dir))
             else: 
                 print('Valdiation loss:', validation_loss)
+                
